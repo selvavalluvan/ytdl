@@ -1,0 +1,3 @@
+body {text-align:center;}
+html, body { margin: 0; padding: 0; }
+.centeredDiv { margin-right: auto; margin-left: auto; width: 800px; padding: 20px 0;}
