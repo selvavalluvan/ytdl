@@ -1,6 +1,7 @@
 <html>
 
 <head>
+    <meta charset="utf-8"/>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" type="text/css"
           href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.5/css/materialize.min.css">
@@ -19,6 +20,10 @@
             background: #fff;
         }
 
+        .container {
+            position: relative;
+        }
+
         .input-field input[type=date]:focus + label,
         .input-field input[type=text]:focus + label,
         .input-field input[type=email]:focus + label,
@@ -33,6 +38,39 @@
             border-bottom: 2px solid #e91e63;
             box-shadow: none;
         }
+
+        .overlay {
+            background: #e9e9e9;
+            display: none;
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            opacity: 0.5;
+        }
+
+        .loader {
+            border: 16px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 16px solid blue;
+            margin-top: 50%;
+            margin-bottom: -120px;
+            width: 120px;
+            height: 120px;
+            -webkit-animation: spin 1s linear infinite;
+            animation: spin 1s linear infinite;
+        }
+
+        @-webkit-keyframes spin {
+            0% { -webkit-transform: rotate(0deg); }
+            100% { -webkit-transform: rotate(360deg); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 
@@ -41,14 +79,17 @@
 <main>
     <center>
         <img class="responsive-img" style="width: 150px;" src="images/yt.gif"/>
-        <div class="section"></div>
+        <!--<div class="section"></div>-->
 
         <h5 class="indigo-text">Upload Ads from YouTube</h5>
         <div class="section"></div>
 
         <div class="container">
+            <div class="overlay">
+                <div class="loader"></div>
+            </div>
             <div class="z-depth-1 grey lighten-4 row"
-                 style="display: inline-block; padding: 32px 48px 0px 48px; border: 1px solid #EEE; width: 50%">
+                 style="display: inline-block; padding: 32px 48px 32px 48px; border: 1px solid #EEE; width: 50%">
 
                 <form class="col s12" method="post" id="uploadAssetForm">
                     <div class='row'>
@@ -58,42 +99,42 @@
 
                     <div class='row'>
                         <div class='input-field col s12'>
-                            <input type='text' name='name' id='name'/>
+                            <input type='text' name='name' id='name' required/>
                             <label for='name'>The name of the ad</label>
                         </div>
                     </div>
 
                     <div class='row'>
                         <div class='input-field col s12'>
-                            <input class='validate' type='text' name='brand' id='brand'/>
+                            <input class='validate' type='text' name='brand' id='brand' required/>
                             <label for='brand'>Enter brand name</label>
                         </div>
                     </div>
 
                     <div class='row'>
                         <div class='input-field col s12'>
-                            <input class='validate' type='url' name='url' id='url'/>
+                            <input class='validate' type='url' name='url' id='url' required/>
                             <label for='url'>Paste the youtube url</label>
                         </div>
                     </div>
 
                     <div class='row'>
                         <div class='input-field col s12'>
-                            <input class='validate' type='text' name='tags' id='tags'/>
+                            <input class='validate' type='text' name='tags' id='tags' required/>
                             <label for='tags'>Tags for the ad, please?</label>
                         </div>
                     </div>
 
                     <div class='row'>
                         <div class='input-field col s12'>
-                            <input class='validate' type='number' name='offered' id='offered'/>
+                            <input class='validate' type='number' name='offered' id='offered' required/>
                             <label for='offered'>What's the offered coins?</label>
                         </div>
                     </div>
 
                     <div class='row'>
                         <div class='input-field col s12'>
-                            <input class='validate' type='number' name='potential' id='potential'/>
+                            <input class='validate' type='number' name='potential' id='potential' required/>
                             <label for='potential'>What's the potential coins the user could get?</label>
                         </div>
                     </div>
@@ -108,15 +149,21 @@
             </div>
         </div>
     </center>
-
-    <div class="section"></div>
-    <div class="section"></div>
 </main>
 
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.1/jquery.min.js"></script>
 <script type="text/javascript"
         src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.5/js/materialize.min.js"></script>
 <script type="text/javascript">
+    $(document)
+        .ajaxStart(function () {
+            console.log("Hello");
+            $('.overlay').show();
+        })
+        .ajaxStop(function () {
+            $('.overlay').hide();
+        });
+
     $('#uploadAssetForm').submit(function (event) {
 
         // Stop form from submitting normally
@@ -129,9 +176,8 @@
             tags = $(this).find('input[name=\'tags\']').val().split(",").map(item=>item.trim()),
             offered = $(this).find('input[name=\'offered\']').val(),
             potential = $(this).find('input[name=\'potential\']').val();
-        console.log(tags);
         // Send the data using post
-        var upload = $.ajax({
+        $.ajax({
             type: 'POST',
             url: '/upload',
             data: {
@@ -139,16 +185,17 @@
                 brand: brand,
                 url: url,
                 tags: tags,
-                offered:  offered,
-                potential: potential
+                floorValue:  offered,
+                ceilValue: potential
             },
-            dataType: 'json'
-        });
-
-        // Send a success toast
-        upload.done(function (data) {
-            $('#uploadAssetForm')[0].reset();
-            Materialize.toast(data.message, 3000);
+            dataType: 'json',
+            success: function (data, text) {
+                $('#uploadAssetForm')[0].reset();
+                Materialize.toast(data.message, 3000);
+            },
+            error: function (request, status, error) {
+                Materialize.toast("Something went wrong! Try again.", 3000);
+            }
         });
     });
 </script>
