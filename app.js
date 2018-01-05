@@ -28,9 +28,11 @@ app.use(bodyParser.urlencoded({extended: false}));
 
 app.post('/upload', function (req, res) {
     Joi.validate(req.body, creativeParams, function (error, params) {
-        if(error) return res.status(422).json("Missing parameters");
+        if(error) {
+            console.error(error);
+            return res.status(422).json("Missing parameters");
+        }
         try {
-            throw new Error("Booyah!");
             let video = youtubedl(req.body.url,
                 // Optional arguments passed to youtube-dl.
                 ['--format=18']);
@@ -38,34 +40,29 @@ app.post('/upload', function (req, res) {
             let data = params;
             data.orientation = 'landscape';
 
-// Will be called when the download starts.
             video.on('info', function (info) {
                 data.name = info.title;
                 data.thumbnail = info.thumbnail;
-                console.log(data)
             });
 
             video.pipe(fs.createWriteStream(path.join(__dirname, 'files', randomName + ".mp4")));
 
             video.on('end', function () {
-                console.log("here");
                 var form = new FormData();
 
                 download(data.thumbnail, randomName + '.jpg', function () {
-                    console.log("here1");
                     form.append('creative', fs.createReadStream(path.join(__dirname, 'files', randomName + ".mp4")));
                     form.append('logo', fs.createReadStream(path.join(__dirname, 'files', randomName + ".jpg")));
                     form.append('thumbnail', fs.createReadStream(path.join(__dirname, 'files', randomName + ".jpg")));
                     form.append('name', data.name);
                     form.append('brand', data.brand);
-                    form.append('tags', "[\"" + data["tags[]"].join('","') + "\"]");
+                    form.append('tags', JSON.stringify(data.tags));
                     form.append('orientation', data.orientation);
-                    form.append('floorValue', data.offered);
-                    form.append('ceilValue', data.potential);
+                    form.append('floorValue', data.floorValue);
+                    form.append('ceilValue', data.ceilValue);
                     var http = require('http');
 
                     let headers = Object.assign({}, form.getHeaders(), {'Cookie': 'bzr-enterprise=eyJzaWQiOiI0NmQ1MmUxZi00ZDI2LTQxYTktYTEyZC1jMjU0ZmFkY2UyYWUiLCJ1aWQiOiJlMTk5NzNkMS1iNWRmLTQ4OTYtYTY2Ny0zYTMxNzI1NWRlMzYifQ==;bzr-enterprise.sig=OtchgjqJr4QIh9HWeHlobh03Ii0;'});
-                    console.log(headers);
                     var request = http.request({
                         method: 'POST',
                         hostname: 'localhost',
@@ -77,7 +74,8 @@ app.post('/upload', function (req, res) {
                     form.pipe(request);
 
                     request.on('response', function(resp) {
-                        console.log(resp.status);
+                        fs.unlinkSync(path.join(__dirname, 'files', randomName + ".mp4"));
+                        fs.unlinkSync(path.join(__dirname, 'files', randomName + ".jpg"));
                         res.json({message: 'Asset successfully added!'});
                     });
 
@@ -85,6 +83,7 @@ app.post('/upload', function (req, res) {
 
             });
         } catch (error){
+            console.error(error);
             return res.status(422).json("Something went wrong! Try again");
         }
 

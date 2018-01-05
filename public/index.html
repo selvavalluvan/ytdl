@@ -62,14 +62,29 @@
             animation: spin 1s linear infinite;
         }
 
+        #toast-container {
+            top: 10%;
+            right: 7%;
+            bottom: auto !important;
+            left: auto !important;
+        }
+
         @-webkit-keyframes spin {
-            0% { -webkit-transform: rotate(0deg); }
-            100% { -webkit-transform: rotate(360deg); }
+            0% {
+                -webkit-transform: rotate(0deg);
+            }
+            100% {
+                -webkit-transform: rotate(360deg);
+            }
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
@@ -79,7 +94,6 @@
 <main>
     <center>
         <img class="responsive-img" style="width: 150px;" src="images/yt.gif"/>
-        <!--<div class="section"></div>-->
 
         <h5 class="indigo-text">Upload Ads from YouTube</h5>
         <div class="section"></div>
@@ -97,12 +111,12 @@
                         </div>
                     </div>
 
-                    <div class='row'>
-                        <div class='input-field col s12'>
-                            <input type='text' name='name' id='name' required/>
-                            <label for='name'>The name of the ad</label>
-                        </div>
-                    </div>
+                    <!--<div class='row'>-->
+                    <!--<div class='input-field col s12'>-->
+                    <!--<input type='text' name='name' id='name' required/>-->
+                    <!--<label for='name'>The name of the ad</label>-->
+                    <!--</div>-->
+                    <!--</div>-->
 
                     <div class='row'>
                         <div class='input-field col s12'>
@@ -142,7 +156,7 @@
                     <br/>
                     <center>
                         <div class='row'>
-                            <button name='btn_login' class='col s12 btn btn-large waves-effect indigo'>Upload</button>
+                            <button id='submit-btn' class='col s12 btn btn-large waves-effect indigo'>Upload</button>
                         </div>
                     </center>
                 </form>
@@ -157,12 +171,21 @@
 <script type="text/javascript">
     $(document)
         .ajaxStart(function () {
-            console.log("Hello");
+            $('#submit-btn').attr('disabled', true);
             $('.overlay').show();
         })
         .ajaxStop(function () {
+            $('#submit-btn').attr('disabled', false);
             $('.overlay').hide();
         });
+
+    $('#uploadAssetForm').on('keyup keypress', function(e) {
+        let keyCode = e.keyCode || e.which;
+        if (keyCode === 13) {
+            e.preventDefault();
+            return false;
+        }
+    });
 
     $('#uploadAssetForm').submit(function (event) {
 
@@ -173,28 +196,29 @@
         var name = $(this).find('input[name=\'name\']').val(),
             brand = $(this).find('input[name=\'brand\']').val(),
             url = $(this).find('input[name=\'url\']').val(),
-            tags = $(this).find('input[name=\'tags\']').val().split(",").map(item=>item.trim()),
+            tags = $(this).find('input[name=\'tags\']').val().split(',').map(item => item.trim()),
             offered = $(this).find('input[name=\'offered\']').val(),
             potential = $(this).find('input[name=\'potential\']').val();
         // Send the data using post
         $.ajax({
             type: 'POST',
             url: '/upload',
-            data: {
+            data: JSON.stringify({
                 name: name,
                 brand: brand,
                 url: url,
                 tags: tags,
-                floorValue:  offered,
+                floorValue: offered,
                 ceilValue: potential
-            },
+            }),
+            contentType: 'application/json; charset=utf-8',
             dataType: 'json',
             success: function (data, text) {
                 $('#uploadAssetForm')[0].reset();
                 Materialize.toast(data.message, 3000);
             },
             error: function (request, status, error) {
-                Materialize.toast("Something went wrong! Try again.", 3000);
+                Materialize.toast('Something went wrong! Try again.', 3000);
             }
         });
     });
