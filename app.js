@@ -73,8 +73,8 @@ app.post('/upload', function (req, res) {
 
                     form.pipe(request);
 
-                    request.on('response', function (resp) {
-                        if (resp.status === 200) {
+                    request.on('response', function (err, resp) {
+                        if (resp.statusCode === 200) {
                             fs.unlinkSync(path.join(__dirname, 'files', randomName + '.mp4'));
                             fs.unlinkSync(path.join(__dirname, 'files', randomName + '.jpg'));
                             res.json({message: 'Asset successfully added!'});
