@@ -3,7 +3,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var fs = require('fs');
 var youtubedl = require('youtube-dl');
-var randomstring = require("randomstring");
+var randomstring = require('randomstring');
 var FormData = require('form-data');
 var Joi = require('joi');
 
@@ -28,9 +28,9 @@ app.use(bodyParser.urlencoded({extended: false}));
 
 app.post('/upload', function (req, res) {
     Joi.validate(req.body, creativeParams, function (error, params) {
-        if(error) {
+        if (error) {
             console.error(error);
-            return res.status(422).json("Missing parameters");
+            return res.status(422).json('Missing parameters');
         }
         try {
             let video = youtubedl(req.body.url,
@@ -45,15 +45,15 @@ app.post('/upload', function (req, res) {
                 data.thumbnail = info.thumbnail;
             });
 
-            video.pipe(fs.createWriteStream(path.join(__dirname, 'files', randomName + ".mp4")));
+            video.pipe(fs.createWriteStream(path.join(__dirname, 'files', randomName + '.mp4')));
 
             video.on('end', function () {
                 var form = new FormData();
 
                 download(data.thumbnail, randomName + '.jpg', function () {
-                    form.append('creative', fs.createReadStream(path.join(__dirname, 'files', randomName + ".mp4")));
-                    form.append('logo', fs.createReadStream(path.join(__dirname, 'files', randomName + ".jpg")));
-                    form.append('thumbnail', fs.createReadStream(path.join(__dirname, 'files', randomName + ".jpg")));
+                    form.append('creative', fs.createReadStream(path.join(__dirname, 'files', randomName + '.mp4')));
+                    form.append('logo', fs.createReadStream(path.join(__dirname, 'files', randomName + '.jpg')));
+                    form.append('thumbnail', fs.createReadStream(path.join(__dirname, 'files', randomName + '.jpg')));
                     form.append('name', data.name);
                     form.append('brand', data.brand);
                     form.append('tags', JSON.stringify(data.tags));
@@ -66,17 +66,17 @@ app.post('/upload', function (req, res) {
                     var request = http.request({
                         method: 'POST',
                         hostname: 'localhost',
-                        port:3000,
+                        port: 5000,
                         path: '/client/14/campaign/21/creative',
                         headers: headers
                     });
 
                     form.pipe(request);
 
-                    request.on('response', function(resp) {
-                        if(resp.status === 200){
-                            fs.unlinkSync(path.join(__dirname, 'files', randomName + ".mp4"));
-                            fs.unlinkSync(path.join(__dirname, 'files', randomName + ".jpg"));
+                    request.on('response', function (resp) {
+                        if (resp.status === 200) {
+                            fs.unlinkSync(path.join(__dirname, 'files', randomName + '.mp4'));
+                            fs.unlinkSync(path.join(__dirname, 'files', randomName + '.jpg'));
                             res.json({message: 'Asset successfully added!'});
                         } else {
                             res.json({message: 'The ad server is down. Contact admin'});
@@ -86,25 +86,24 @@ app.post('/upload', function (req, res) {
                 });
 
             });
-        } catch (error){
+        } catch (error) {
             console.error(error);
-            return res.status(422).json("Something went wrong! Try again");
+            return res.status(422).json('Something went wrong! Try again');
         }
 
     });
 
 });
 
-var download = function(uri, filename, callback){
+var download = function (uri, filename, callback) {
     var request = require('request');
-    request.head(uri, function(err, res, body){
+    request.head(uri, function (err, res, body) {
         console.log('content-type:', res.headers['content-type']);
         console.log('content-length:', res.headers['content-length']);
 
         request(uri).pipe(fs.createWriteStream(path.join(__dirname, 'files', filename))).on('close', callback);
     });
 };
-
 
 
 // Listen for requests
