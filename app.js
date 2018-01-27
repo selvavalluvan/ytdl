@@ -67,7 +67,7 @@ app.post('/upload', function (req, res) {
                         method: 'POST',
                         hostname: 'localhost',
                         port: 5000,
-                        path: '/client/14/campaign/21/creative',
+                        path: '/client/1/campaign/1/creative',
                         headers: headers
                     });
 
