@@ -74,9 +74,13 @@ app.post('/upload', function (req, res) {
                     form.pipe(request);
 
                     request.on('response', function(resp) {
-                        fs.unlinkSync(path.join(__dirname, 'files', randomName + ".mp4"));
-                        fs.unlinkSync(path.join(__dirname, 'files', randomName + ".jpg"));
-                        res.json({message: 'Asset successfully added!'});
+                        if(resp.status === 200){
+                            fs.unlinkSync(path.join(__dirname, 'files', randomName + ".mp4"));
+                            fs.unlinkSync(path.join(__dirname, 'files', randomName + ".jpg"));
+                            res.json({message: 'Asset successfully added!'});
+                        } else {
+                            res.json({message: 'The ad server is down. Contact admin'});
+                        }
                     });
 
                 });
