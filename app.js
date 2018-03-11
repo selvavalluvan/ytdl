@@ -62,7 +62,7 @@ app.post('/upload', function (req, res) {
                     form.append('ceilValue', data.ceilValue);
                     var http = require('http');
 
-                    let headers = Object.assign({}, form.getHeaders(), {'Cookie': 'bzr-enterprise=eyJzaWQiOiJiNDNlYTNmNi1hNWVkLTQyZTItOWNmNS1jNTY2ZTcwZDNkOTUiLCJ1aWQiOiJkYmUzN2IyMS04NWMxLTRjMjctODJhYi0yNDViNDgyMzdhNzIifQ==;bzr-enterprise.sig=Cut0ygqvzpA59Ol-Yc8H78kp8LA;'});
+                    let headers = Object.assign({}, form.getHeaders(), {'Cookie': 'bzr-enterprise=eyJzaWQiOiJhNDBlZThkMC04YjU3LTQ2ZTktOThhZC0xYmM3NmRiZmQwMmUiLCJ1aWQiOiJjMTY3ZjNlYy0wNDc3LTQzZWMtYmIwZS1jMWIwNTBhNjk4NjQifQ==;bzr-enterprise.sig=dM13W1JaQ1YdWGBbIXro27VSNKk;'});
                     var request = http.request({
                         method: 'POST',
                         hostname: 'localhost',
