@@ -23,6 +23,7 @@
   "homepage": "https://github.com/fullstacktraining/express-static-files#readme",
   "dependencies": {
     "body-parser": "^1.17.2",
+    "csvtojson": "^1.1.9",
     "express": "^4.13.3",
     "form-data": "^2.3.1",
     "http": "0.0.0",
