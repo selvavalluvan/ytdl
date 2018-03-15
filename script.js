@@ -60,7 +60,8 @@ var start = function (jsonArrayData) {
         upload(data, function (err, success) {
             if(err){
                 errorData.push(data);
-                console.error(data)
+            } else {
+                console.log("success ", success)
             }
             next();
         })
@@ -81,7 +82,6 @@ csv()
 
 
 var upload = function (data, callback) {
-    console.log(data)
     let video = youtubedl(data.url,
         // Optional arguments passed to youtube-dl.
         ['--format=18']);
@@ -129,7 +129,6 @@ var upload = function (data, callback) {
                     // fs.unlinkSync(path.join(__dirname, 'files', randomName + '.jpg'));
                     callback(null, {message: 'Asset successfully added!'});
                 } else {
-                    console.log(resp.statusCode);
                     callback('The ad server is down. Contact admin', null);
                 }
             });
@@ -142,8 +141,6 @@ var upload = function (data, callback) {
 var download = function (uri, filename, callback) {
     var request = require('request');
     request.head(uri, function (err, res, body) {
-        console.log('content-type:', res.headers['content-type']);
-        console.log('content-length:', res.headers['content-length']);
 
         request(uri).pipe(fs.createWriteStream(path.join(__dirname, 'files', filename))).on('close', callback);
     });
